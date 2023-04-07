@@ -1,0 +1,45 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+       - postgres-db:/data/postgres
+    ports:
+      - "5432:5432"
+
+  django:
+    build: ./app
+    privileged: true
+    env_file:
+      - ./.env
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    entrypoint: ${APP_HOME}/entrypoint.sh
+    volumes:
+      - static_volume:${APP_HOME}/staticfiles
+
+  nginx:
+    image: nginx:latest
+    restart: on-failure
+    privileged: true
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./configs:/etc/nginx/conf.d
+      - static_volume:${APP_HOME}/staticfiles
+    depends_on:
+      - django
+    ports:
+      - "80:80"
+
+volumes:
+  postgres-db:
+  static_volume:

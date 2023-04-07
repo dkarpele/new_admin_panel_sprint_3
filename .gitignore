@@ -1,0 +1,3 @@
+movies_admin/config/.env
+/app/sqlite_to_postgres/.env
+/app/sqlite_to_postgres/tests/.env

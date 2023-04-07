@@ -1,0 +1,139 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-14 21:43+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: movies/admin.py:52
+msgid "film_genres"
+msgstr "Жанры фильма"
+
+#: movies/apps.py:8
+msgid "movies"
+msgstr ""
+
+#: movies/models.py:9 movies/models.py:79 movies/models.py:120
+msgid "created"
+msgstr ""
+
+#: movies/models.py:10
+msgid "modified"
+msgstr ""
+
+#: movies/models.py:27
+msgid "name"
+msgstr ""
+
+#: movies/models.py:29 movies/models.py:50
+msgid "description"
+msgstr ""
+
+#: movies/models.py:40
+msgid "verbose_name_genre"
+msgstr ""
+
+#: movies/models.py:41
+msgid "verbose_name_genre_plural"
+msgstr ""
+
+#: movies/models.py:46
+msgid "movie"
+msgstr ""
+
+#: movies/models.py:47
+msgid "tv_show"
+msgstr ""
+
+#: movies/models.py:49
+msgid "title"
+msgstr ""
+
+#: movies/models.py:51
+msgid "creation_date"
+msgstr ""
+
+#: movies/models.py:52
+msgid "rating"
+msgstr ""
+
+#: movies/models.py:56
+msgid "type"
+msgstr ""
+
+#: movies/models.py:68
+msgid "verbose_name_filmwork"
+msgstr ""
+
+#: movies/models.py:69
+msgid "verbose_name_filmwork_plural"
+msgstr ""
+
+#: movies/models.py:75 movies/models.py:112
+msgid "film_work"
+msgstr ""
+
+#: movies/models.py:78
+msgid "genre"
+msgstr ""
+
+#: movies/models.py:83
+msgid "genrefilmwork"
+msgstr ""
+
+#: movies/models.py:84
+msgid "genrefilmwork_plural"
+msgstr ""
+
+#: movies/models.py:92
+msgid "full_name"
+msgstr ""
+
+#: movies/models.py:101
+msgid "verbose_name_person"
+msgstr ""
+
+#: movies/models.py:102
+msgid "verbose_name_person_plural"
+msgstr ""
+
+#: movies/models.py:107
+msgid "director"
+msgstr ""
+
+#: movies/models.py:108
+msgid "writer"
+msgstr ""
+
+#: movies/models.py:109
+msgid "actor"
+msgstr ""
+
+#: movies/models.py:115
+msgid "person"
+msgstr ""
+
+#: movies/models.py:116
+msgid "role"
+msgstr ""
+
+#: movies/models.py:124
+msgid "personfilmwork"
+msgstr ""
+
+#: movies/models.py:125
+msgid "personfilmwork_plural"
+msgstr ""

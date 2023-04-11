@@ -6,4 +6,4 @@ django-split-settings==1.2.0
 pytest==7.2.2
 django-cors-headers==3.14.0
 uWSGI==2.0.21
-elasticsearch==8.6.2
+elasticsearch==8.7.0

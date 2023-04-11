@@ -1,4 +1,3 @@
-import os
 import uuid
 from datetime import datetime, date
 from dataclasses import dataclass, field
@@ -6,17 +5,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SCHEMA = 'content'
-TRIGGER = 'modified'
-STATE_FILE = 'state.json'
-CHUNK_SIZE = 100
-
-DSL = {'dbname': os.environ.get('DB_NAME'),
-       'user': os.environ.get('DB_USER'),
-       'password': os.environ.get('DB_PASSWORD'),
-       'host': os.environ.get('DB_HOST', '127.0.0.1'),
-       'port': os.environ.get('DB_PORT', 5432),
-       'options': '-c search_path=%s' % os.environ.get('SEARCH_PATH')}
 
 @dataclass
 class MixinId:
@@ -64,11 +52,13 @@ class PersonFilmWork(MixinId):
     created: datetime = datetime.now()
 
 
-# Don't change the database order!
-DATABASE_LIST = {
-    'film_work': FilmWork,
-    'person': Person,
-    'genre': Genre,
-    'person_film_work': PersonFilmWork,
-    'genre_film_work': GenreFilmWork,
-}
+@dataclass
+class Merger(MixinDate, MixinId):
+    title: str = field(default="")
+    description: str = field(default="")
+    imdb_rating: float = field(default=0.0)
+    genre: list = field(default=list)
+    actors: list = field(default=list)
+    writers: list = field(default=list)
+    directors: list = field(default=list)
+

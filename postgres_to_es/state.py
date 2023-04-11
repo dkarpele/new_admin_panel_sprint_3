@@ -77,36 +77,3 @@ class State:
                 return self.storage.retrieve_state()[key]
         except KeyError:
             return None
-
-#
-# state_dict = {
-#     'film_work': {
-#         'modified': '1970-01-01 00:00:00'
-#     },
-#     'person': {
-#         'modified': '1970-01-01 00:00:00'
-#     },
-#     'genre': {
-#         'modified': '1970-01-01 00:00:00'
-#     },
-# }
-# def create_json_file(file_name):
-#     state = {'modified': '23:23:23'}
-#     with open(file_name, "w") as outfile:
-#         json.dump(state, outfile)
-#
-#
-# def main_method():
-#     file_path = "state"
-#     key = 'modified'
-#     value = '11:11:11'
-#     # create_json_file(file_path)
-#     stor = JsonFileStorage(file_path)
-#     state = State(stor)
-#     state.get_state(key)
-#     state.set_state(key, value)
-#     print(state.get_state(key))
-#
-#
-# if __name__ == '__main__':
-#     main_method()

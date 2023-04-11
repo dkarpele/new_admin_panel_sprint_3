@@ -87,7 +87,6 @@ def es_cursor(conn_info):
                         elif n == 0:
                             wait_time = 0
                         if connection.info():
-                            logging.info('Reconnected to ES successfully')
                             break
                 except elasticsearch.exceptions.__all__ as err:
                     logging.error(err)

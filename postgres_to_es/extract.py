@@ -7,7 +7,7 @@ from schemas import Merger
 from consts import DSL
 from pg_sql_request import filmwork_merger, person_producer, person_enricher, \
     genre_producer, genre_enricher
-from tools import psycopg2_cursor
+from tools import db_cursor_backoff
 
 logging.config.fileConfig(fname='logger.conf', disable_existing_loggers=False)
 
@@ -25,7 +25,7 @@ class Extract(abc.ABC):
             f"""OFFSET {str(self.start)} ROWS
                 LIMIT {str(self.next_)} """
 
-    @psycopg2_cursor(DSL)
+    @db_cursor_backoff(DSL, db_type='db')
     def extract(self, cursor, connection) -> List[Any]:
         merger = self.merger(cursor)
         return merger

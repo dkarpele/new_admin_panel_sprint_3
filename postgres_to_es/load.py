@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 
 from consts import ES, ES_SETTINGS, ES_MAPPINGS, ES_INDEX
-from tools import es_cursor
+from tools import db_cursor_backoff
 logging.config.fileConfig(fname='logger.conf', disable_existing_loggers=False)
 
 # Get the logger specified in the file
@@ -23,7 +23,7 @@ class Load:
         self._index = _index
         self.file_path = es_file_path
 
-    @es_cursor(ES)
+    @db_cursor_backoff(ES, db_type='es')
     def es_create_index_if_not_exists(self):
         """Create the given ElasticSearch index and ignore error if it already
         exists"""
@@ -76,7 +76,7 @@ class Load:
 
         return operation
 
-    @es_cursor(ES)
+    @db_cursor_backoff(ES, db_type='es')
     def es_bulk_load(self, operation: list):
         es = elasticsearch.Elasticsearch(**ES)
         res = es.bulk(index=ES_INDEX,

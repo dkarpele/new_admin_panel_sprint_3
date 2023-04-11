@@ -13,7 +13,7 @@ from load import Load
 from pg_sql_request import func_notify_trigger, trigger_insert_update,\
     listen_event, initial_notify, payload
 from consts import DSL, DATABASE_LIST
-from tools import psycopg2_cursor
+from tools import db_cursor_backoff
 
 
 logging.config.fileConfig(fname='logger.conf', disable_existing_loggers=False)
@@ -26,7 +26,7 @@ class PGListen:
     def __init__(self):
         self.event_name = 'db_event'
 
-    @psycopg2_cursor(DSL)
+    @db_cursor_backoff(DSL, db_type='pg')
     def create_triggers(self, cursor, connection) -> None:
         """ Create triggers to be notified by the change in `modified` field"""
         # Create triggers only for tables filmwork, person, genre!

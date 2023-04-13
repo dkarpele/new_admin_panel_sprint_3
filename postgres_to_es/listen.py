@@ -4,7 +4,7 @@ import logging.config
 
 import psycopg2.extensions
 import psycopg2
-
+import psycopg2.errors
 from psycopg2.extras import DictCursor
 from psycopg2.extras import LoggingConnection
 
@@ -12,7 +12,7 @@ from etl import ETL
 from load import Load
 from pg_sql_request import func_notify_trigger, trigger_insert_update,\
     listen_event, initial_notify, payload
-from consts import DSL, DATABASE_LIST
+from consts import DBCreds, DATABASE_LIST
 from tools import db_cursor_backoff
 
 
@@ -26,26 +26,36 @@ class PGListen:
     def __init__(self):
         self.event_name = 'db_event'
 
-    @db_cursor_backoff(DSL, db_type='pg')
+    @db_cursor_backoff(DBCreds().dict(), db_type='pg')
     def create_triggers(self, cursor, connection) -> None:
         """ Create triggers to be notified by the change in `modified` field"""
         # Create triggers only for tables filmwork, person, genre!
         for base in list(DATABASE_LIST.keys())[:3]:
             func_name = f"notify_trigger_{base}"
-            cursor.execute(func_notify_trigger(func_name,
-                                               base,
-                                               self.event_name))
-            cursor.execute(trigger_insert_update(func_name,
-                                                 base))
+            try:
+                cursor.execute(func_notify_trigger(func_name,
+                                                   base,
+                                                   self.event_name))
+                cursor.execute(trigger_insert_update(func_name,
+                                                     base))
+            except psycopg2.errors.lookup('09000') as err:
+                logging.error(f'Failed to create trigger {base}_notify')
+                logging.error(err)
+            logging.info(f'Trigger {base}_notify created.')
 
     def listen_events(self) -> None:
         try:
-            connection = psycopg2.connect(**DSL,
-                                  cursor_factory=DictCursor,
-                                  connection_factory=LoggingConnection)
+            connection = psycopg2.connect(**DBCreds().dict(),
+                                          cursor_factory=DictCursor,
+                                          connection_factory=LoggingConnection)
             connection.initialize(logger)
             cursor = connection.cursor()
+        except psycopg2.OperationalError as err:
+            logging.error('Postgres is unavailable. Exiting.')
+            logging.error(err)
+            exit(1)
 
+        try:
             connection.set_isolation_level(
                 psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
@@ -54,8 +64,9 @@ class PGListen:
             logging.info(f"Waiting for notifications on channel "
                          f"'{self.event_name}'")
 
-            # Initial notify. Start to create index from here for table
+            # Initial notify. Start to create ES index from here for table
             # `film_work`.
+            # base = `film_work`
             base = list(DATABASE_LIST.keys())[0]
             cursor.execute(f'SELECT {payload(base)}')
             res = cursor.fetchone()
@@ -84,6 +95,7 @@ class PGListen:
         except Exception as err:
             logging.error(err)
         finally:
+            cursor.close()
             connection.close()
 
 

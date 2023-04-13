@@ -1,46 +1,39 @@
 import json
+import logging.config
 import os
+
+from pydantic import BaseSettings, Field
 
 from dotenv import load_dotenv
 
 from schemas import FilmWork, Person, Genre, GenreFilmWork, PersonFilmWork
+
+logging.config.fileConfig(fname='logger.conf', disable_existing_loggers=False)
+
+# Get the logger specified in the file
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 SCHEMA = 'content'
 TRIGGER = 'modified'
 CHUNK_SIZE = 5
-DSL = {'dbname': os.environ.get('DB_NAME'),
-       'user': os.environ.get('DB_USER'),
-       'password': os.environ.get('DB_PASSWORD'),
-       'host': os.environ.get('DB_HOST', '127.0.0.1'),
-       'port': os.environ.get('DB_PORT', 5432),
-       'options': '-c search_path=%s' % os.environ.get('SEARCH_PATH')}
-
-STATE_FILE = 'state.json'
-
-ES_SCHEMA_FILE = 'es_schema'
-ES_INDEX = os.environ.get('ES_INDEX', 'movies')
-ES = {'hosts': os.environ.get('ES_HOST', '127.0.0.1:9200')}
 
 
-def es_settings_mappings():
-    settings, mappings, doc = {}, {}, {}
-    with open(ES_SCHEMA_FILE, 'r') as openfile:
-        try:
-            schema = json.load(openfile)
-            settings = schema['settings']
-            mappings = schema['mappings']
-        except IOError as err:
-            print(err)
-    for keys in mappings['properties'].keys():
-        doc.update({keys: ''})
-    return settings, mappings, doc
+class DBCreds(BaseSettings):
+    dbname: str = Field(..., env="DB_NAME")
+    user: str = Field(..., env="DB_USER")
+    password: str = Field(..., env="DB_PASSWORD")
+    host: str = Field(env="DB_HOST", default='127.0.0.1')
+    port: int = Field(env="DB_PORT", default=5432)
+    options: str = '-c search_path=%s' % os.environ.get('SEARCH_PATH')
 
+    class Config:
+        env_prefix = ""
+        case_sentive = False
+        env_file = '.env'
+        env_file_encoding = 'utf-8'
 
-ES_SETTINGS = es_settings_mappings()[0]
-ES_MAPPINGS = es_settings_mappings()[1]
-ES_DOC = es_settings_mappings()[2]
 
 # Don't change the database order!
 DATABASE_LIST = {
@@ -51,6 +44,41 @@ DATABASE_LIST = {
     'genre_film_work': GenreFilmWork,
 }
 
+
+ES_SCHEMA_FILE = 'es_schema'
+ES_INDEX = os.environ.get('ES_INDEX', 'movies')
+
+
+class ESCreds(BaseSettings):
+    hosts: str = Field(env="ES_HOST", default='127.0.0.1:9200')
+
+    class Config:
+        env_prefix = ""
+        case_sentive = False
+        env_file = '.env'
+        env_file_encoding = 'utf-8'
+
+
+def es_settings_mappings():
+    settings, mappings, doc = {}, {}, {}
+    with open(ES_SCHEMA_FILE, 'r') as openfile:
+        try:
+            schema = json.load(openfile)
+            settings = schema['settings']
+            mappings = schema['mappings']
+        except IOError as err:
+            logging.error(err)
+    for keys in mappings['properties'].keys():
+        doc.update({keys: ''})
+    return settings, mappings, doc
+
+
+ES_SETTINGS = es_settings_mappings()[0]
+ES_MAPPINGS = es_settings_mappings()[1]
+ES_DOC = es_settings_mappings()[2]
+
 START_SLEEP_TIME = 1
 FACTOR = 2
 BORDER_SLEEP_TIME = 10
+
+STATE_FILE = 'state.json'

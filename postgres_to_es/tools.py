@@ -30,11 +30,15 @@ def db_cursor_backoff(conn_info, db_type='pg'):
             n = 0
             while True:
                 try:
-                    conn_type = psycopg2.connect(**conn_info,
-                                          cursor_factory=DictCursor,
-                                          connection_factory=LoggingConnection)
                     if db_type == 'es':
                         conn_type = elasticsearch.Elasticsearch(**conn_info)
+                    elif db_type == 'pg':
+                        conn_type = psycopg2.connect(**conn_info,
+                                                     cursor_factory=DictCursor,
+                                                     connection_factory=LoggingConnection)
+                    else:
+                        logging.error(f'DB type {db_type} doesn\'t exist!')
+                        exit(1)
                     with conn_type as connection:
                         if db_type == 'pg':
                             connection.initialize(logger)
@@ -44,7 +48,7 @@ def db_cursor_backoff(conn_info, db_type='pg'):
                                 return_val = f(self, cursor, connection, *args,
                                                **kwargs)
                         else:
-                            return_val = f(self, cursor, connection, *args,
+                            return_val = f(self, connection, *args,
                                            **kwargs)
                         if n > 0:
                             wait_time = START_SLEEP_TIME * FACTOR ** n
@@ -52,9 +56,13 @@ def db_cursor_backoff(conn_info, db_type='pg'):
                             sleep(wait_time)
                         elif n == 0:
                             wait_time = 0
-                        if connection.info.status == 0:
-                            break
-                except (Exception, elasticsearch.exceptions.__all__) as err:
+                        if db_type == 'pg':
+                            if connection.info.status == 0:
+                                break
+                        elif db_type == 'es':
+                            if connection.info():
+                                break
+                except Exception as err:
                     logging.error(err)
                     return_val = None
                     if wait_time < BORDER_SLEEP_TIME:

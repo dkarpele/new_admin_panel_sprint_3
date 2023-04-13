@@ -4,7 +4,7 @@ import logging.config
 from typing import List, Any
 
 from schemas import Merger
-from consts import DSL
+from consts import DBCreds
 from pg_sql_request import filmwork_merger, person_producer, person_enricher, \
     genre_producer, genre_enricher
 from tools import db_cursor_backoff
@@ -25,7 +25,7 @@ class Extract(abc.ABC):
             f"""OFFSET {str(self.start)} ROWS
                 LIMIT {str(self.next_)} """
 
-    @db_cursor_backoff(DSL, db_type='db')
+    @db_cursor_backoff(DBCreds().dict(), db_type='pg')
     def extract(self, cursor, connection) -> List[Any]:
         merger = self.merger(cursor)
         return merger

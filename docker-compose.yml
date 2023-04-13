@@ -9,8 +9,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
        - postgres-db:/data/postgres
-    ports:
-      - "5432:5432"
 
   django:
     build: ./app
@@ -19,8 +17,6 @@ services:
       - ./.env
     expose:
       - "8000"
-    ports:
-      - "8000:8000"
     depends_on:
       - postgres
     entrypoint: ${APP_HOME}/entrypoint.sh
@@ -40,6 +36,33 @@ services:
     ports:
       - "80:80"
 
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
+    container_name: es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+       - es-db:/data/es
+    depends_on:
+      - django
+
+  etl:
+    build: ./postgres_to_es
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+      - django
+      - nginx
+      - es
+    entrypoint: ${ETL_HOME}/entrypoint.sh
+    volumes:
+      - etl_volume:/data/etl
+
 volumes:
   postgres-db:
   static_volume:
+  es-db:
+  etl_volume:

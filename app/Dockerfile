@@ -11,7 +11,7 @@ ENV UWSGI_THREADS 16
 ENV UWSGI_HARAKIRI 240
 ENV DJANGO_SETTINGS_MODULE 'config.settings'
 
-COPY ../requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 COPY entrypoint.sh entrypoint.sh
 COPY uwsgi/uwsgi.ini uwsgi.ini
 

@@ -1,6 +1,14 @@
 import abc
+import logging.config
+
 from typing import Any
 import json
+
+
+logging.config.fileConfig(fname='logger.conf', disable_existing_loggers=False)
+
+# Get the logger specified in the file
+logger = logging.getLogger(__name__)
 
 
 class BaseStorage(abc.ABC):
@@ -46,7 +54,7 @@ class JsonFileStorage(BaseStorage):
             with open(self.file_path, 'r') as openfile:
                 state_dict: dict[str, Any] = json.load(openfile)
         except IOError as err:
-            print(err)
+            logging.error(err)
         if not self.file_path:
             return state_dict
         if not state_dict:

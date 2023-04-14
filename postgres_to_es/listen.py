@@ -12,7 +12,7 @@ from etl import ETL
 from load import Load
 from pg_sql_request import func_notify_trigger, trigger_insert_update,\
     listen_event, initial_notify, payload
-from consts import DBCreds, DATABASE_LIST
+from config import DBCreds, DATABASE_LIST
 from tools import db_cursor_backoff
 
 
@@ -64,14 +64,14 @@ class PGListen:
             logging.info(f"Waiting for notifications on channel "
                          f"'{self.event_name}'")
 
-            # Initial notify. Start to create ES index from here for table
-            # `film_work`.
+            # Initial notify. Start to create ES index from here for tables
+            # `film_work`, `person`, `genre`.
             # base = `film_work`
-            base = list(DATABASE_LIST.keys())[0]
-            cursor.execute(f'SELECT {payload(base)}')
-            res = cursor.fetchone()
-            cursor.execute(initial_notify(self.event_name,
-                                          str(res[0]).replace("'", '"')))
+            for base in list(DATABASE_LIST.keys())[:3]:
+                cursor.execute(f'SELECT {payload(base)}')
+                res = cursor.fetchone()
+                cursor.execute(initial_notify(self.event_name,
+                                              str(res[0]).replace("'", '"')))
 
             while True:
                 try:

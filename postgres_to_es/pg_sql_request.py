@@ -1,4 +1,4 @@
-from consts import SCHEMA, TRIGGER
+from config import SCHEMA, TRIGGER
 
 
 def payload(base: str) -> str:
@@ -78,8 +78,7 @@ def person_producer(where_condition: str = '',
     """
 
 
-def person_enricher(where_condition: str = '',
-                    limit_condition: str = '') -> str:
+def person_enricher(where_condition: str = '') -> str:
     """ Select all film works with current persons"""
     return f"""
     SELECT fw.id, fw.modified
@@ -87,8 +86,7 @@ def person_enricher(where_condition: str = '',
     LEFT JOIN {SCHEMA}.person_film_work pfw ON pfw.film_work_id = fw.id
     {where_condition}
     GROUP BY fw.id
-    ORDER BY fw.modified
-    {limit_condition};
+    ORDER BY fw.modified, fw.id;
     """
 
 
@@ -102,8 +100,7 @@ def genre_producer(where_condition: str = '') -> str:
     """
 
 
-def genre_enricher(where_condition: str = '',
-                   limit_condition: str = '') -> str:
+def genre_enricher(where_condition: str = '') -> str:
     """ Select all film works with current genres"""
     return f"""
     SELECT fw.id, fw.modified
@@ -111,8 +108,7 @@ def genre_enricher(where_condition: str = '',
     LEFT JOIN {SCHEMA}.genre_film_work gfw ON gfw.film_work_id = fw.id
     {where_condition}
     GROUP BY fw.id
-    ORDER BY fw.modified
-    {limit_condition};
+    ORDER BY fw.modified, fw.id;
     """
 
 
@@ -138,6 +134,6 @@ def filmwork_merger(where_condition: str = '',
     LEFT JOIN {SCHEMA}.genre g ON g.id = gfw.genre_id
     {where_condition}
     GROUP BY fw.id
-    ORDER BY fw.modified
+    ORDER BY fw.modified, fw.id
     {limit_condition};
     """

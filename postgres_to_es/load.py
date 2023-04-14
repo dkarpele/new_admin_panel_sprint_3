@@ -5,7 +5,7 @@ import os
 
 from dotenv import load_dotenv
 
-from consts import ESCreds, ES_SETTINGS, ES_MAPPINGS, ES_INDEX
+from config import ESCreds, ES_SETTINGS, ES_MAPPINGS, ES_INDEX
 from tools import db_cursor_backoff
 logging.config.fileConfig(fname='logger.conf', disable_existing_loggers=False)
 
@@ -79,8 +79,13 @@ class Load:
     def es_bulk_load(self, connection, operation: list):
         res = connection.bulk(index=ES_INDEX,
                               operations=operation,
-                              filter_path="items.*.error")
+                              filter_path="items.*.error",
+                              source=True)
+        uploaded_ids = [index['index']['_id']
+                        for n, index in enumerate(operation) if n % 2 != 1]
         if not res.body:
-            logging.info('Docs uploaded successfully.')
+            logging.info(f'Docs uploaded successfully with id_ below: \n'
+                         f'{uploaded_ids}')
+
         else:
             logging.error(f'{res.body["items"]} failed to upload to ES.')

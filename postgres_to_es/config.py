@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-SCHEMA = 'content'
+SCHEMA = os.environ.get('PG_SCHEMA')
 TRIGGER = 'modified'
-CHUNK_SIZE = 5
+CHUNK_SIZE = 100
 
 
 class DBCreds(BaseSettings):
@@ -26,7 +26,7 @@ class DBCreds(BaseSettings):
     password: str = Field(..., env="DB_PASSWORD")
     host: str = Field(env="DB_HOST", default='127.0.0.1')
     port: int = Field(env="DB_PORT", default=5432)
-    options: str = '-c search_path=%s' % os.environ.get('SEARCH_PATH')
+    options: str = '-c search_path=%s' % os.environ.get('PG_SCHEMA')
 
     class Config:
         env_prefix = ""

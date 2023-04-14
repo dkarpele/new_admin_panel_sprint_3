@@ -1,7 +1,7 @@
 import logging.config
 
 from state import JsonFileStorage, State
-from consts import STATE_FILE, CHUNK_SIZE
+from config import STATE_FILE, CHUNK_SIZE
 import extract
 import load
 
@@ -57,12 +57,16 @@ class ETL:
             es.es_bulk_load(es.prepare_bulk_load(data))
 
             # Update state using latest modified time
-            try:
-                max_item = max([(item.id_, item.modified) for item in data])
+            if self.base == 'film_work':
+                try:
+                    max_item = max([(item.modified, item.id_) for item in data])
 
-                new_state = {'id': str(max_item[0]),
-                             'modified': str(max_item[1])}
+                    new_state = {'id': str(max_item[1]),
+                                 'modified': str(max_item[0])}
+                    State(JsonFileStorage(STATE_FILE)).set_state(self.base,
+                                                                 new_state)
+                except IndexError:
+                    pass
+            else:
                 State(JsonFileStorage(STATE_FILE)).set_state(self.base,
-                                                             new_state)
-            except IndexError:
-                pass
+                                                             self.new_state)

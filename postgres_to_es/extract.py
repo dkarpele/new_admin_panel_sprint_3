@@ -4,7 +4,7 @@ import logging.config
 from typing import List, Any
 
 from schemas import Merger
-from consts import DBCreds
+from config import DBCreds
 from pg_sql_request import filmwork_merger, person_producer, person_enricher, \
     genre_producer, genre_enricher
 from tools import db_cursor_backoff
@@ -44,7 +44,7 @@ class Extract(abc.ABC):
             return []
         films_ids = self.concat_ids(enricher)
         where_condition = f"WHERE fw.id IN ({films_ids})"
-
+        self.limit_condition = ''
         m = Filmwork(self.base,
                      self.old_state,
                      self.start,
@@ -96,8 +96,7 @@ class Person(Extract):
         where_condition = f"WHERE pfw.person_id IN ({persons_ids})"
 
         return self.execute(cursor,
-                            person_enricher(where_condition,
-                                            self.limit_condition))
+                            person_enricher(where_condition))
 
 
 class Genre(Extract):
@@ -116,8 +115,7 @@ class Genre(Extract):
         where_condition = f"WHERE gfw.genre_id IN ({genres_ids})"
 
         return self.execute(cursor,
-                            genre_enricher(where_condition,
-                                           self.limit_condition))
+                            genre_enricher(where_condition))
 
 
 class Filmwork(Extract):

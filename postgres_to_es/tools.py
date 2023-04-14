@@ -10,7 +10,7 @@ import psycopg2
 import psycopg2.extensions
 from psycopg2.extras import DictCursor, LoggingConnection
 
-from consts import START_SLEEP_TIME, FACTOR, BORDER_SLEEP_TIME
+from config import START_SLEEP_TIME, FACTOR, BORDER_SLEEP_TIME
 
 logging.config.fileConfig(fname='logger.conf', disable_existing_loggers=False)
 
@@ -28,18 +28,25 @@ def db_cursor_backoff(conn_info, db_type='pg'):
         def wrapper(self, *args, **kwargs):
             wait_time = 0
             n = 0
+            if db_type == 'es':
+                connection = elasticsearch.Elasticsearch(**conn_info)
+            elif db_type == 'pg':
+                try:
+                    connection = psycopg2.connect \
+                        (**conn_info,
+                         cursor_factory=DictCursor,
+                         connection_factory=LoggingConnection)
+                except psycopg2.OperationalError as err:
+                    logging.error('Postgres is unavailable. Exiting.')
+                    logging.error(err)
+                    exit(1)
+            else:
+                logging.error(f'DB type {db_type} doesn\'t exist!')
+                exit(1)
+
             while True:
                 try:
-                    if db_type == 'es':
-                        conn_type = elasticsearch.Elasticsearch(**conn_info)
-                    elif db_type == 'pg':
-                        conn_type = psycopg2.connect(**conn_info,
-                                                     cursor_factory=DictCursor,
-                                                     connection_factory=LoggingConnection)
-                    else:
-                        logging.error(f'DB type {db_type} doesn\'t exist!')
-                        exit(1)
-                    with conn_type as connection:
+                    with connection as connection:
                         if db_type == 'pg':
                             connection.initialize(logger)
                         if db_type == 'pg':
@@ -70,7 +77,11 @@ def db_cursor_backoff(conn_info, db_type='pg'):
                         n += 1
                     elif wait_time >= BORDER_SLEEP_TIME:
                         wait_time = BORDER_SLEEP_TIME
-                    sleep(wait_time)
+                    try:
+                        sleep(wait_time)
+                    except KeyboardInterrupt:
+                        logging.info('Process stopped by user')
+                        exit(0)
                 finally:
                     connection.close()
 

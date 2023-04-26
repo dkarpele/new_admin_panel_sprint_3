@@ -3,6 +3,7 @@ from django.db.models import Q, QuerySet
 from django.http import JsonResponse
 from django.views.generic.list import BaseListView
 from django.views.generic.detail import BaseDetailView
+from django.shortcuts import render
 
 from movies.models import Filmwork, PersonFilmwork
 
@@ -71,3 +72,7 @@ class MoviesDetailApi(MoviesApiMixin, BaseDetailView):
         queryset = self.get_queryset()
         context = list(queryset)[0]
         return context
+
+
+def page_not_found_view(request, exception):
+    return render(request, '404.html', status=404)

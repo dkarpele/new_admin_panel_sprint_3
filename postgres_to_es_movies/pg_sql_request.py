@@ -123,7 +123,7 @@ def filmwork_merger(where_condition: str = '',
     fw.title, 
     fw.description, 
     fw.rating as imdb_rating, 
-    ARRAY_AGG(DISTINCT g.name ORDER BY g.name) AS genre,
+    ARRAY_AGG(DISTINCT g.id || ':' || g.name) AS genre,
     ARRAY_AGG(DISTINCT p.id || ':' || p.full_name) FILTER (WHERE pfw.role = 'actor') AS actors,
     ARRAY_AGG(DISTINCT p.id || ':' || p.full_name ) FILTER (WHERE pfw.role = 'writer') AS writers,
     ARRAY_AGG(DISTINCT p.id || ':' || p.full_name ) FILTER (WHERE pfw.role = 'director') AS directors

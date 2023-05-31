@@ -5,7 +5,7 @@ import os
 
 from dotenv import load_dotenv
 
-from config import ESCreds, ES_SETTINGS, ES_MAPPINGS, ES_INDEX
+from config import ESCreds, ES_SETTINGS, ES_MAPPINGS, ES_INDEX_GENRES
 from tools import db_cursor_backoff
 logging.config.fileConfig(fname='logger.conf', disable_existing_loggers=False)
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-_index = os.environ.get('ES_INDEX', 'movies')
+_index = os.environ.get('ES_INDEX_GENRES', 'genres')
 es_file_path = 'es_schema'
 
 
@@ -37,38 +37,14 @@ class Load:
 
     @staticmethod
     def prepare_bulk_load(data) -> list:
-        def actors_writers(persons):
-            id_name = []
-            try:
-                for i in persons:
-                    id_name.append(
-                        {'id': i[: i.index(':')], 'name': i[i.index(':')+1:]})
-                return id_name
-            except TypeError:
-                return []
-
-        def persons_list(persons):
-            try:
-                return [i[i.index(':')+1:] for i in persons]
-            except TypeError:
-                return []
-
         operation = []
         for merger in data:
 
-            action = {"index": {"_index": ES_INDEX,
+            action = {"index": {"_index": ES_INDEX_GENRES,
                                 "_id": merger.id_}}
 
             doc = {"id": merger.id_,
-                   "imdb_rating": merger.imdb_rating,
-                   "genre": merger.genre,
-                   "title": merger.title,
-                   "description": merger.description,
-                   "director": persons_list(merger.directors),
-                   "actors_names": persons_list(merger.actors),
-                   "writers_names": persons_list(merger.writers),
-                   "actors": actors_writers(merger.actors),
-                   "writers": actors_writers(merger.writers)}
+                   "name": merger.name}
 
             operation.append(action)
             operation.append(doc)
@@ -77,7 +53,7 @@ class Load:
 
     @db_cursor_backoff(ESCreds().dict(), db_type='es')
     def es_bulk_load(self, connection, operation: list):
-        res = connection.bulk(index=ES_INDEX,
+        res = connection.bulk(index=ES_INDEX_GENRES,
                               operations=operation,
                               filter_path="items.*.error",
                               source=True)

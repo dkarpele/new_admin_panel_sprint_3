@@ -38,33 +38,47 @@ services:
     ports:
       - "80:80"
 
-  es:
+  es-old:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
-    container_name: es
+    container_name: es-old
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
-       - es-db:/data/es
+       - es-db-old:/data/es
     depends_on:
       - django
 
-  etl:
-    build: ./postgres_to_es
+  etl_movies:
+    build: ./postgres_to_es_movies
     env_file:
       - ./.env
     depends_on:
       - postgres
       - django
       - nginx
-      - es
+      - es-old
     entrypoint: ${ETL_HOME}/entrypoint.sh
     volumes:
-      - etl_volume:/data/etl
+      - etl_movies_volume:/data/etl_movies
+
+  etl_genres:
+    build: ./postgres_to_es_genres
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+      - django
+      - nginx
+      - es-old
+    entrypoint: ${ETL_HOME}/entrypoint.sh
+    volumes:
+      - etl_genres_volume:/data/etl_genres
 
 volumes:
   postgres-db:
   static_volume:
-  es-db:
-  etl_volume:
+  es-db-old:
+  etl_movies_volume:
+  etl_genres_volume:

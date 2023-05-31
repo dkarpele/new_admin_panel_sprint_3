@@ -46,7 +46,7 @@ DATABASE_LIST = {
 
 
 ES_SCHEMA_FILE = 'es_schema'
-ES_INDEX = os.environ.get('ES_INDEX', 'movies')
+ES_INDEX_GENRES = os.environ.get('ES_INDEX_GENRES', 'movies')
 
 
 class ESCreds(BaseSettings):

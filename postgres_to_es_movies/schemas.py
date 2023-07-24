@@ -53,7 +53,7 @@ class PersonFilmWork(MixinId):
 
 
 @dataclass
-class Merger(MixinDate, MixinId):
+class MergerFilmWork(MixinDate, MixinId):
     title: str = field(default="")
     description: str = field(default="")
     imdb_rating: float = field(default=0.0)
@@ -62,3 +62,13 @@ class Merger(MixinDate, MixinId):
     writers: list = field(default=list)
     directors: list = field(default=list)
 
+
+@dataclass
+class MergerPerson(MixinDate, MixinId):
+    full_name: str = field(default="")
+
+
+@dataclass
+class MergerGenre(MixinDate, MixinId):
+    name: str = field(default="")
+    description: str = field(default="")

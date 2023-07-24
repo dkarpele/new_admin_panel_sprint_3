@@ -25,13 +25,17 @@ class ETL:
 
         while True:
             if self.base == 'film_work':
-                where_condition = f"WHERE fw.modified > '{self.old_state['modified']}'"
-
+                where_condition = \
+                    f"WHERE fw.modified > '{self.old_state['modified']}'"
+                limit_condition = \
+                    f"""OFFSET {str(start)} ROWS
+                        LIMIT {str(next_)} """
                 init_extract = extract.Filmwork(self.base,
                                                 self.old_state,
                                                 start,
                                                 next_,
-                                                where_condition)
+                                                where_condition,
+                                                limit_condition)
             elif self.base == 'person':
                 init_extract = extract.Person(self.base,
                                               self.old_state,
@@ -47,7 +51,7 @@ class ETL:
                 break
 
             data = init_extract.extract()
-            if not data:
+            if not all(data.values()):
                 break
 
             start += next_
@@ -59,7 +63,8 @@ class ETL:
             # Update state using latest modified time
             if self.base == 'film_work':
                 try:
-                    max_item = max([(item.modified, item.id_) for item in data])
+                    max_item = max([(item.modified, item.id_)
+                                    for item in data['movies']])
 
                     new_state = {'id': str(max_item[1]),
                                  'modified': str(max_item[0])}

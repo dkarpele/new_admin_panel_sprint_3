@@ -45,8 +45,7 @@ DATABASE_LIST = {
 }
 
 
-ES_SCHEMA_FILE = 'es_schema'
-ES_INDEX_MOVIES = os.environ.get('ES_INDEX_MOVIES', 'movies')
+ES_SCHEMA_FILES = 'es_schema_movies es_schema_persons es_schema_genres'
 
 
 class ESCreds(BaseSettings):
@@ -59,9 +58,15 @@ class ESCreds(BaseSettings):
         env_file_encoding = 'utf-8'
 
 
-def es_settings_mappings():
+def es_settings_mappings(index: str):
     settings, mappings, doc = {}, {}, {}
-    with open(ES_SCHEMA_FILE, 'r') as openfile:
+    file_name = ''
+    for i in ES_SCHEMA_FILES.split():
+        if index in i:
+            file_name = i
+            break
+
+    with open(file_name, 'r') as openfile:
         try:
             schema = json.load(openfile)
             settings = schema['settings']
@@ -72,10 +77,6 @@ def es_settings_mappings():
         doc.update({keys: ''})
     return settings, mappings, doc
 
-
-ES_SETTINGS = es_settings_mappings()[0]
-ES_MAPPINGS = es_settings_mappings()[1]
-ES_DOC = es_settings_mappings()[2]
 
 START_SLEEP_TIME = 1
 FACTOR = 2

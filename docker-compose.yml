@@ -12,18 +12,18 @@ services:
        - ./db/dump.sql:/docker-entrypoint-initdb.d/dump.sql
        - postgres-db:/data/postgres
 
-  django:
-    build: ./app
-    privileged: true
-    env_file:
-      - ./.env
-    expose:
-      - "8000"
-    depends_on:
-      - postgres
-    entrypoint: ${APP_HOME}/entrypoint.sh
-    volumes:
-      - static_volume:${APP_HOME}/staticfiles
+#  django:
+#    build: ./app
+#    privileged: true
+#    env_file:
+#      - ./.env
+#    expose:
+#      - "8000"
+#    depends_on:
+#      - postgres
+#    entrypoint: ${APP_HOME}/entrypoint.sh
+#    volumes:
+#      - static_volume:${APP_HOME}/staticfiles
 
   nginx:
     image: nginx:latest
@@ -33,22 +33,22 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./configs:/etc/nginx/conf.d
       - static_volume:${APP_HOME}/staticfiles
-    depends_on:
-      - django
+#    depends_on:
+#      - django
     ports:
       - "80:80"
 
-  es-old:
+  es:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
-    container_name: es-old
+    container_name: es
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
-       - es-db-old:/data/es
-    depends_on:
-      - django
+       - es:/data/es
+#    depends_on:
+#      - django
 
   etl_movies:
     build: ./postgres_to_es_movies
@@ -56,29 +56,29 @@ services:
       - ./.env
     depends_on:
       - postgres
-      - django
+#      - django
       - nginx
-      - es-old
+      - es
     entrypoint: ${ETL_HOME}/entrypoint.sh
     volumes:
       - etl_movies_volume:/data/etl_movies
-
-  etl_genres:
-    build: ./postgres_to_es_genres
-    env_file:
-      - ./.env
-    depends_on:
-      - postgres
-      - django
-      - nginx
-      - es-old
-    entrypoint: ${ETL_HOME}/entrypoint.sh
-    volumes:
-      - etl_genres_volume:/data/etl_genres
+#
+#  etl_genres:
+#    build: ./postgres_to_es_genres
+#    env_file:
+#      - ./.env
+#    depends_on:
+#      - postgres
+#      - django
+#      - nginx
+#      - es-old
+#    entrypoint: ${ETL_HOME}/entrypoint.sh
+#    volumes:
+#      - etl_genres_volume:/data/etl_genres
 
 volumes:
   postgres-db:
   static_volume:
-  es-db-old:
+  es:
   etl_movies_volume:
-  etl_genres_volume:
+#  etl_genres_volume:

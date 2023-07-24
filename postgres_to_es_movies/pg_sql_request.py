@@ -68,9 +68,9 @@ def count_modified_rows(base: str, old_state: str) -> str:
 
 def person_producer(where_condition: str = '',
                     limit_condition: str = '') -> str:
-    """ Select all persons works from database"""
+    """ Select all persons from database where modified > old modified"""
     return f"""
-    SELECT id, modified
+    SELECT id as id_, created, modified, full_name
     FROM {SCHEMA}.person
     {where_condition}
     ORDER BY modified
@@ -81,7 +81,7 @@ def person_producer(where_condition: str = '',
 def person_enricher(where_condition: str = '') -> str:
     """ Select all film works with current persons"""
     return f"""
-    SELECT fw.id, fw.modified
+    SELECT fw.id, fw.created, fw.modified
     FROM {SCHEMA}.film_work fw
     LEFT JOIN {SCHEMA}.person_film_work pfw ON pfw.film_work_id = fw.id
     {where_condition}
@@ -91,9 +91,9 @@ def person_enricher(where_condition: str = '') -> str:
 
 
 def genre_producer(where_condition: str = '') -> str:
-    """ Select all genres works from database"""
+    """ Select all genres from database where modified > old modified"""
     return f"""
-    SELECT id, modified
+    SELECT id as id_, created, modified, name
     FROM {SCHEMA}.genre
     {where_condition}
     ORDER BY modified;
@@ -103,7 +103,7 @@ def genre_producer(where_condition: str = '') -> str:
 def genre_enricher(where_condition: str = '') -> str:
     """ Select all film works with current genres"""
     return f"""
-    SELECT fw.id, fw.modified
+    SELECT fw.id, fw.created, fw.modified
     FROM {SCHEMA}.film_work fw
     LEFT JOIN {SCHEMA}.genre_film_work gfw ON gfw.film_work_id = fw.id
     {where_condition}

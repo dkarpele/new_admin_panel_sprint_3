@@ -66,7 +66,6 @@ class PGListen:
 
             # Initial notify. Start to create ES index from here for tables
             # `film_work`, `person`, `genre`.
-            # base = `film_work`
             for base in list(DATABASE_LIST.keys())[:3]:
                 cursor.execute(f'SELECT {payload(base)}')
                 res = cursor.fetchone()
